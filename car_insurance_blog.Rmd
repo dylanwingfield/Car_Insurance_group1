@@ -1,0 +1,79 @@
+---
+title: "Things Happen, Be Alert: A Look at Car Insurance Discrimination"
+author: "Dylan Wingfield, Ashleigh Colquhoun, Philip Solimeo"
+output:
+  html_document:
+    theme: cosmo
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+Boom. Crash. All it takes is one moment for your world to turn upside down. Car accidents are a common place in the United States and about 38,000 people die due to these car accidents (see reference 1 for more). So, to create a sense of comfort and to protect yourself and your vehicle the best solution is car insurance. However, is car insurance actually on your side? These companies claim to be on your side and that they are protecting you and your interests. There is a level of discrimination that is not talked about as much. Instead of being on your side, accepting the quotes given to you after you have given your personal information, may have just fallen victim to this bias system. 
+
+## What is going on
+Relationships between job and marital status in comparison with insurance status, do they exist? What about if someone has car loans or house insurance does this impact if a person has car insurance? Even age and gender, do these values correlate with car insurance claim values? These types of questions will help reveal the hidden bias of the car insurance world. 
+
+Another point to consider would be race, which will be mentioned later on, however there is not ample data for us to conduct our own experiment but bias is visible through research.
+
+## Data 
+The data for this analysis is from two locations. On the coding studio R, the package insuranceData, contains several insurance datasets pertaining to car insurance claims. Our other data comes from the data website kaggle. We used “Car Insurance Cold Calls,” specifically the car_train table. (https://www.kaggle.com/kondla/carinsurance) This data was based on information collected during car insurance sales calls. After downloading the data table from the internet and installing the R package, we conducted a formal analysis. 
+
+## How to answer our questions
+After taking the data and downloading the csv file, certain columns, variables, will be selected per graphical image. After selecting these variables, scatter plots and bar charts were made, some contained color codes and regression lines. Mean insurance balances, due to excess amounts of data, were used as an attempt to claim this would be the average balance per type of person, such as the average female of age 50 or the average person with no car loan. After analyzing these graphics, they show a clear pattern to draw a conclusion upon the existence of bias in car insurance. We overall examined proportion sizes, bar lengths, and linear regression patterns in scatter plots for sour core argument. The results below are the formal conclusions we have from this analysis style.
+
+## Results
+The largest takeaway from our findings is that most bias stems from economic status assumptions. In order to explain this better the graphic below will show house insurance and car loan status, whether the person has both, neither, or one or the other, and the proportion of each of these groups that has car insurance. Below the graph on the left shows those with no car loans, headed by 0, and those with car loans, headed by 1. Then each column in the graph has a 0 or 1 associated with it, meaning someone does not have or has house insurance respectively. The takeaway here is that the majority of people do not have car loans and if they do not have car loans, then they most likely do not have house insurance but do have car insurance. However by not having a loan on their car there is a preconceived notion that this makes the person wealthier not that this vehicle could be their livelihood or work related in some form. Also, for the large part, loan or no loan, if someone has house insurance they most likely do not have car insurance. This leads to an assumption insurance agents could make that if you decide to go for car insurance, you probably have extra money to do so since a large proportion of people, just not the majority, do go for house insurance. 
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+carins_train <- read.csv("carInsurance_train.csv") 
+
+carins_train %>% ggplot(aes(x = factor(HHInsurance),fill=factor(CarInsurance))) +
+geom_bar() +
+  labs(x= "House Insurance (1 = yes, 0 = no)", fill = "Car Insurance Status (1 = yes, 0 = no)", title = "House Insurance and Car Loans vs Car Insurance") + facet_wrap(~CarLoan)
+```
+
+As further evidence this bias is true, the second graph below compares the mean insurance balance someone with a car loan or without a loan pays. Those without a loan pay more as seen by the taller bar. Not having a car loan does not mean that a person traverses life with ease. They could work day in and day out to pay for their car or their company covered the car fee or even they won the car or earned it as a gift. Loans are not an accurate tool for economic status, evidence like tax returns would be more sufficient. 
+
+```{r, echo=FALSE}
+carins_train %>% mutate(CarLoan = as.character(CarLoan)) %>% group_by(CarLoan) %>% 
+  summarise(CarLoan = first(CarLoan),
+            mean_balance = mean(Balance)) %>% 
+  ggplot(aes(x=CarLoan,y=mean_balance))+geom_col()+ labs(x="Car Loan (1  = yes, 0 = no)", y = "Mean Balance", title = "Does having a Car Loan affect the Balance Owed")
+```
+
+Job titles can also be misleading. The third graph depicts different job types compared to the mean car insurance balance paid per job type. Self employed pays the most, however this does not accurately represent this job. This occupation makes you believe that they are economically efficient but self employed could mean struggling, starting out, or even doing work for the betterment of their fellow man. It creates preconceived notions about how one is living that is not necessarily justified.
+
+```{r,echo=FALSE}
+carins_train %>% filter(!is.na(Job),CarInsurance == 1) %>% group_by(Job) %>% 
+  summarise(Job = first(Job),
+            mean_balance = mean(Balance)) %>%
+  ggplot(aes(x=Job, y= mean_balance)) +geom_col()+theme(axis.text.x = element_text(angle = 315, vjust = 1, hjust = 0))+labs(title = "Insurance Balance in Relation to Different Jobs", y = "Mean Balance", x = "Job")
+```
+
+Economic bias with car insurance is similar to geographically profiling insurance based on where you live. This is leading into racial discrimination. Auto insurance companies are associated with charging higher than average premiums to drivers living in predominantly minority urban neighborhoods than to drivers in majority white neighborhoods (see reference 2). This is all done under the guise of safety. Companies say that an area is safer so they charge less but safer corresponds to white majority neighborhoods. Coincidence? Insurance companies are profiling locations by safety, or wealth, but they are actually racially profiling areas causing disparities between minority and majority ethnic groups. 
+
+In addition to economic and racial discrimination, relationship status and age and gender, human qualties we have little control over impact car insurance as well. The fourth graph below shows relationship status and the proportion, shown by color, if the person has car insurance or not. Since red is predominant in the marital status bar this indicates most married people do not have car insurance. This could be an indication that the other spouse has it and is not recorded or maybe a family deal of some type is at play. However, single or divorced people have a 50/50 chance of having car insurance. So, a company can take advantage of this fact and keep the prices higher for these people since they most likely will get car insurance over the married customer. It creates preconceived bias. The seller is taking advantage of the likelihood you will get car insurance. 
+
+```{r,echo=FALSE}
+carins_train %>% mutate(CarInsurance = as.character(CarInsurance)) %>% group_by(Marital) %>%  select(Marital,CarInsurance) %>% ggplot(aes(x=Marital,fill=CarInsurance))+geom_bar() +labs(title = "Influence of Marital Status on Car Insurance", y = "Count", x = "Marital Status",fill = "Car Insurance Status (1 = yes, 0 = no)")
+```
+
+In addition to relationship status, the following graph shows age and gender against car insurance payments. The scatterplots are broken out by two genders, male and female, and are plotting age against mean payment. Also shown is a linear regression line, a line that shows the general trend in the graph. For females, the payment level stays about the same as age increases since the line is flat but for males as age increases the line is rising showing older males pay more. This is not only ageism but a form of sexism. Even if the payment increases with age, why isn’t it for both genders? Although the discrimination has gotten better overtime, it still exists and needs to be adressed for car insurance. 
+
+```{r,echo=FALSE, message=FALSE}
+library(insuranceData)
+data("AutoClaims")
+AutoClaims %>%group_by(GENDER,AGE) %>% summarise(AGE = first(AGE),mean_paid = mean(PAID),GENDER=first(GENDER)) %>%  
+  ggplot(aes(x=AGE,y=mean_paid))+geom_point()+facet_wrap(~GENDER)+geom_smooth(method = "lm")+ labs(title = "Accident Amount Paid with respect to Different Ages", y = "Mean Paid", x = "Age")
+```
+
+## Closing Remarks 
+
+Before accepting your car insurance price consider what went into their decision, and if your pricing is fair. Maybe a discussion should happen before you settle. Just remember the car insurance company may not be on your side and you never know when the next accident could happen. Things happen, be alert. 
+
+## References
+(1) https://www.asirt.org/safe-travel/road-safety-facts/ 
+(2) https://www.propublica.org/article/minority-neighborhoods-higher-car-insurance-premiums-white-areas-same-risk 
+
